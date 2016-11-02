@@ -47,6 +47,7 @@ const defaultProps = {
   disabled: false,
   required: false,
   reopenPickerOnClearDates: false,
+  keepOpenOnDateSelect: false,
   initialVisibleMonth: () => moment(),
 
   orientation: HORIZONTAL_ORIENTATION,
@@ -95,7 +96,7 @@ export default class DateRangePicker extends React.Component {
   }
 
   onDayClick(day, modifiers, e) {
-    const { minimumNights } = this.props;
+    const { keepOpenOnDateSelect, minimumNights } = this.props;
     if (e) e.preventDefault();
     if (includes(modifiers, 'blocked')) return;
 
@@ -118,7 +119,7 @@ export default class DateRangePicker extends React.Component {
         this.props.onFocusChange(START_DATE);
       } else if (isInclusivelyAfterDay(day, firstAllowedEndDate)) {
         endDate = day;
-        this.props.onFocusChange(null);
+        if (!keepOpenOnDateSelect) this.props.onFocusChange(null);
       } else {
         startDate = day;
         endDate = null;
@@ -145,7 +146,13 @@ export default class DateRangePicker extends React.Component {
   }
 
   onEndDateChange(endDateString) {
-    const { startDate, isOutsideRange, onDatesChange, onFocusChange } = this.props;
+    const {
+      startDate,
+      isOutsideRange,
+      keepOpenOnDateSelect,
+      onDatesChange,
+      onFocusChange,
+    } = this.props;
 
     const endDate = toMomentObject(endDateString, this.getDisplayFormat());
 
@@ -153,7 +160,7 @@ export default class DateRangePicker extends React.Component {
       !isInclusivelyBeforeDay(endDate, startDate);
     if (isEndDateValid) {
       onDatesChange({ startDate, endDate });
-      onFocusChange(null);
+      if (!keepOpenOnDateSelect) onFocusChange(null);
     } else {
       onDatesChange({
         startDate,
